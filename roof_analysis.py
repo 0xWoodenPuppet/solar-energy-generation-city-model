@@ -42,7 +42,7 @@ buildings_analysis = buildings.cx[bounds[0]:bounds[2], bounds[1]:bounds[3]]
 # accuracy=1 means a 1x1 meter grid, precision=900 means check every 15 mins
 sunshine_winter = pybdshadow.cal_sunshine(buildings_analysis,
                                           day='2022-01-01',
-                                          roof=False,
+                                          roof=True,
                                           accuracy=1,
                                           precision=900)
 print("Sunshine analysis complete.\n")
