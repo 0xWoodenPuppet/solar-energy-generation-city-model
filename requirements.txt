@@ -1,0 +1,7 @@
+streamlit
+geopandas
+pybdshadow
+pandas
+streamlit-keplergl
+keplergl
+numpy
