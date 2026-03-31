@@ -2,6 +2,7 @@ import streamlit as st
 import geopandas as gpd
 import pybdshadow
 import pandas as pd
+import plotly.express as px
 from streamlit_keplergl import keplergl_static
 from keplergl import KeplerGl
 
@@ -10,8 +11,8 @@ st.set_page_config(page_title="Saurya Sankulan - BIPV Simulator", layout="wide")
 st.title("🏙️ Saurya Sankulan: 3D City Solar Assessment")
 
 # --- PARAMETERS & CONSTANTS ---
-ELECTRICITY_PRICE_KWH = 0.15
 CO2_OFFSET_RATE_LBS_KWH = 0.85
+AVG_HOME_KWH_PER_DAY = 30.0
 
 st.sidebar.header("Simulation Settings")
 
@@ -51,37 +52,37 @@ if st.sidebar.button("Run Simulation", type="primary"):
     with st.spinner(f"Simulating shadows for {len(bbox_buildings)} buildings..."):
         
         # Calculate shadows for the bounded area
-        # Using a fixed grid spacing based on accuracy to get point-level irradiation
         sunshine = pybdshadow.cal_sunshine(bbox_buildings, 
                                           day=str(sim_date), 
                                           roof=True, 
                                           accuracy=accuracy)
         
         # Calculate actual usable area per grid point
-        # Point area = accuracy * accuracy (since it's a grid)
         point_area_m2 = accuracy * accuracy
         
-        # Simple Energy Estimate:
-        # sunshine['Hour'] contains hours of direct sunlight.
-        # Assume max irradiance of 1000W/m2 (1kW/m2), derate 0.75 for system losses, and 0.18 for PV efficiency
+        # Simple Energy Estimate
         sunshine['kWh_m2'] = sunshine['Hour'] * 0.18 * 0.75
         
         # Scale to total energy based on area and user multipliers
         sunshine['kWh_total'] = sunshine['kWh_m2'] * point_area_m2 * usable_area_pct * yield_multiplier
         
         total_kwh = sunshine['kWh_total'].sum()
-        total_savings = total_kwh * ELECTRICITY_PRICE_KWH
+        homes_powered = total_kwh / AVG_HOME_KWH_PER_DAY
         total_co2 = total_kwh * CO2_OFFSET_RATE_LBS_KWH
         
         # --- 4. EXECUTIVE DASHBOARD ---
         st.markdown("---")
         st.subheader("Executive Summary")
         m1, m2, m3 = st.columns(3)
-        m1.metric("Neighborhood Solar Potential", f"{total_kwh:,.0f} kWh", "Daily Generation")
-        m2.metric("Estimated Monetary Value", f"${total_savings:,.2f}", "Daily Savings")
-        m3.metric("CO2 Emissions Prevented", f"{total_co2:,.0f} lbs", "Daily Carbon Offset")
+        m1.metric("Total Neighborhood Potential", f"{total_kwh:,.0f} kWh", "Daily Generation")
+        m2.metric("Homes Powered", f"{homes_powered:,.0f} Average Homes", "Equivalent daily energy")
+        m3.metric("Environmental Impact", f"{total_co2:,.0f} lbs", "Daily CO2 Offset")
         st.markdown("---")
-        
+
+        # Profitable Installations Metric
+        profitable_buildings = (sunshine.groupby('building_id')['kWh_total'].sum() > 5.0).sum()
+        st.success(f"Out of {len(bbox_buildings)} buildings in this neighborhood, {profitable_buildings} have sufficient unshaded roof space for a profitable solar installation.")
+
         # --- 5. VISUALIZATIONS ---
         col1, col2 = st.columns([2, 1])
         
@@ -90,27 +91,21 @@ if st.sidebar.button("Run Simulation", type="primary"):
             map_1 = KeplerGl(height=500)
             map_1.add_data(data=bbox_buildings.copy(), name='Buildings')
             map_1.add_data(data=sunshine.copy(), name='Solar Intensity')
-            
-            # Use predefined config if available, otherwise keplergl_static will use default
             keplergl_static(map_1)
             
         with col2:
             st.subheader("Comparative Analysis")
-            # Calculate total kWh per building
             building_totals = sunshine.groupby('building_id')['kWh_total'].sum().sort_values(ascending=False).head(10)
             st.write("Top 10 High-Yield Buildings (Daily kWh):")
             st.bar_chart(building_totals)
             
-            st.subheader("Hourly Generation Curve (Proxy)")
-            # PyBDShadow calculates total sunny hours per grid point. We don't have the exact profile natively.
-            # To simulate a curve, we'll plot a normal distribution approximating solar noon.
-            # NOTE: this is an approximation for visualization purposes of the BIPV potential scale.
+            st.subheader("Hourly Generation Curve")
             hours = pd.DataFrame({'Hour': range(6, 19)})
-            # A simple bell curve centered at noon (12:00) representing solar production
             import numpy as np
             hours['Production (kWh)'] = total_kwh * (np.exp(-0.5 * ((hours['Hour'] - 12) / 2.5) ** 2) / (2.5 * np.sqrt(2 * np.pi)))
-            hours = hours.set_index('Hour')
-            st.line_chart(hours)
+            fig = px.line(hours, x='Hour', y='Production (kWh)', markers=True)
+            fig.update_layout(height=300, margin=dict(l=0, r=0, t=30, b=0))
+            st.plotly_chart(fig, use_container_width=True)
 
 else:
     st.info("Adjust the settings in the sidebar and click **'Run Simulation'** to generate the executive report.")
