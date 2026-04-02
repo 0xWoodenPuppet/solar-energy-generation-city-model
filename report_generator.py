@@ -176,8 +176,8 @@ def generate_report(
     pdf.cell(0, 7, f"Simulation Date: {sim_date}  |  Study Radius: {study_radius_m}m  |  Buildings Analyzed: {num_buildings}", new_x="LMARGIN", new_y="NEXT")
     pdf.ln(6)
 
-    # --- Executive Summary ---
-    pdf.section_title("Executive Summary")
+    # --- Summary ---
+    pdf.section_title("Summary")
     pdf.metric_row([
         ("Total Solar Potential", f"{total_kwh:,.0f} kWh", "Daily Generation"),
         ("Homes Powered", f"{homes_powered:,.0f}", "Equivalent Avg. Homes"),

@@ -225,7 +225,7 @@ if run:
 
     # ── EXECUTIVE DASHBOARD ──────────────────────────────────
     st.markdown("---")
-    st.subheader("📊 Executive Summary")
+    st.subheader("📊 Summary")
 
     r1c1, r1c2, r1c3, r1c4 = st.columns(4)
     r1c1.metric("Daily Solar Potential", f"{total_kwh:,.0f} kWh", "Total Neighborhood")
@@ -382,7 +382,7 @@ if run:
     )
 
     st.download_button(
-        label="📄 Download Executive PDF Report",
+        label="📄 Download PDF Report",
         data=pdf_bytes,
         file_name=f"saurya_sankulan_report_{sim_date}.pdf",
         mime="application/pdf",
