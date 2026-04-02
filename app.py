@@ -257,31 +257,32 @@ if run:
         map_3d.add_data(data=sunshine.copy(), name="Solar Intensity")
         keplergl_static(map_3d)
 
-    # ── Tab 2 : 2D Heatmap (Plotly) ────────────────────────────
+    # ── Tab 2 : 2D Heatmap (Pure Plotly scatter) ────────────────
     with tab_heatmap:
         st.subheader("Rooftop Solar Hotspot Heatmap")
 
-        # Extract centroids and energy for plotting
         heat_df = sunshine.copy()
         heat_df["lat"] = heat_df.geometry.centroid.y
         heat_df["lon"] = heat_df.geometry.centroid.x
 
-        fig_heat = px.density_mapbox(
+        fig_heat = px.scatter(
             heat_df,
-            lat="lat",
-            lon="lon",
-            z="kWh_total",
-            radius=10,
-            zoom=16,
-            center={"lat": sel_lat, "lon": sel_lon},
-            mapbox_style="carto-darkmatter",
+            x="lon",
+            y="lat",
+            color="kWh_total",
             color_continuous_scale="Turbo",
-            height=550,
+            size="kWh_total",
+            size_max=8,
+            labels={"lon": "Longitude", "lat": "Latitude", "kWh_total": "Energy (kWh)"},
         )
         fig_heat.update_layout(
-            margin=dict(l=0, r=0, t=0, b=0),
+            height=550,
+            margin=dict(l=10, r=10, t=10, b=10),
+            xaxis=dict(scaleanchor="y", constrain="domain"),
+            yaxis=dict(constrain="domain"),
             coloraxis_colorbar_title="kWh",
         )
+        fig_heat.update_traces(marker=dict(opacity=0.7))
         st.plotly_chart(fig_heat, use_container_width=True)
 
     # ── Tab 3 : Charts ───────────────────────────────────────
@@ -298,6 +299,7 @@ if run:
                 .reset_index()
             )
             building_totals.columns = ["Building", "Daily Energy (kWh)"]
+            building_totals["Building"] = building_totals["Building"].astype(str)
             fig_bar = px.bar(
                 building_totals,
                 x="Building",
@@ -309,9 +311,6 @@ if run:
             fig_bar.update_layout(
                 height=400,
                 margin=dict(l=10, r=10, t=30, b=10),
-                plot_bgcolor="rgba(0,0,0,0)",
-                paper_bgcolor="rgba(0,0,0,0)",
-                font_color="#c0c0d0",
                 xaxis_title="Building ID",
                 yaxis_title="Energy (kWh)",
             )
@@ -334,9 +333,6 @@ if run:
             fig_line.update_layout(
                 height=400,
                 margin=dict(l=10, r=10, t=30, b=10),
-                plot_bgcolor="rgba(0,0,0,0)",
-                paper_bgcolor="rgba(0,0,0,0)",
-                font_color="#c0c0d0",
                 xaxis=dict(dtick=1),
             )
             st.plotly_chart(fig_line, use_container_width=True)
