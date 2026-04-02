@@ -275,7 +275,7 @@ if run:
 
     # ── Tab 2 : 2D Heatmap (Pure Plotly scatter) ────────────────
     with tab_heatmap:
-        st.subheader("Rooftop Solar Hotspot Heatmap")
+        st.subheader("Rooftop Solar Energy Map")
 
         heat_df = sunshine.copy()
         heat_df["lat"] = heat_df.geometry.centroid.y
