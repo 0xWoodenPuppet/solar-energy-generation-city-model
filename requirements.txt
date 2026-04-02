@@ -1,11 +1,12 @@
 setuptools==65.5.0
 wheel
 streamlit
-geopandas
+geopandas==0.14.4
 pybdshadow
 pandas
 numpy
 plotly
+shapely<2.0
 streamlit-keplergl
 keplergl
 streamlit-folium
