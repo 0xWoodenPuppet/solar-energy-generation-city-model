@@ -11,6 +11,4 @@ shapely<2.0
 mapbox-vector-tile==1.2.1
 streamlit-keplergl
 keplergl
-streamlit-folium
-folium
 fpdf2

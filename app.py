@@ -5,8 +5,6 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-import folium
-from streamlit_folium import st_folium
 from streamlit_keplergl import keplergl_static
 from keplergl import KeplerGl
 from report_generator import generate_report
@@ -121,46 +119,27 @@ dataset_center_lon = (bounds[0] + bounds[2]) / 2
 dataset_center_lat = (bounds[1] + bounds[3]) / 2
 
 # ──────────────────────────────────────────────────────────────
-# 2. SIDEBAR — AREA SELECTION (Folium Map)
+# 2. SIDEBAR — AREA SELECTION
 # ──────────────────────────────────────────────────────────────
 st.sidebar.header("📍 Area Selection")
-st.sidebar.caption("Click the map to choose a neighborhood center.")
+st.sidebar.caption(f"Dataset extent: {bounds[1]:.4f}–{bounds[3]:.4f}°N, {bounds[0]:.4f}–{bounds[2]:.4f}°E")
 
-selection_map = folium.Map(
-    location=[dataset_center_lat, dataset_center_lon],
-    zoom_start=15,
-    tiles="CartoDB dark_matter",
-    width="100%",
-    height=260,
+sel_lat = st.sidebar.number_input(
+    "Center Latitude",
+    min_value=float(bounds[1]),
+    max_value=float(bounds[3]),
+    value=float(dataset_center_lat),
+    format="%.5f",
+    step=0.001,
 )
-
-# Add a subtle rectangle showing the full dataset extent
-folium.Rectangle(
-    bounds=[[bounds[1], bounds[0]], [bounds[3], bounds[2]]],
-    color="#00d4ff",
-    fill=True,
-    fill_opacity=0.08,
-    weight=1,
-    tooltip="Full dataset extent",
-).add_to(selection_map)
-
-map_data = st_folium(
-    selection_map,
-    width=280,
-    height=260,
-    returned_objects=["last_clicked"],
-    key="area_selector",
+sel_lon = st.sidebar.number_input(
+    "Center Longitude",
+    min_value=float(bounds[0]),
+    max_value=float(bounds[2]),
+    value=float(dataset_center_lon),
+    format="%.5f",
+    step=0.001,
 )
-
-# Determine selected center
-if map_data and map_data.get("last_clicked"):
-    sel_lat = map_data["last_clicked"]["lat"]
-    sel_lon = map_data["last_clicked"]["lng"]
-    st.sidebar.success(f"Selected: {sel_lat:.5f}, {sel_lon:.5f}")
-else:
-    sel_lat = dataset_center_lat
-    sel_lon = dataset_center_lon
-    st.sidebar.info("Using dataset center. Click the map to pick a different spot.")
 
 # ──────────────────────────────────────────────────────────────
 # 3. SIDEBAR — SIMULATION SETTINGS
