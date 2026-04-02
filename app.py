@@ -328,6 +328,7 @@ if run:
                 height=400,
                 margin=dict(l=10, r=10, t=30, b=10),
                 xaxis_title="Building ID",
+                xaxis_type="category",
                 yaxis_title="Energy (kWh)",
             )
             st.plotly_chart(fig_bar, use_container_width=True)
