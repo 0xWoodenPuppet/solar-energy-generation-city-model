@@ -1,14 +1,11 @@
 setuptools==65.5.0
 wheel
-protobuf==3.19.6
 streamlit
-geopandas==0.14.4
+geopandas
 pybdshadow
 pandas
 numpy
 plotly
-shapely<2.0
-mapbox-vector-tile==1.2.1
 streamlit-keplergl
 keplergl
 fpdf2

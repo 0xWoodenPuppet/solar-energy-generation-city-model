@@ -1,3 +1,19 @@
+import sys
+from unittest.mock import MagicMock
+
+# ------------------------------------------------------------------
+# PATCH: pybdshadow's __init__.py unconditionally imports
+# get_buildings → vt2geojson → mapbox_vector_tile, which is broken
+# on modern shapely (no cascaded_union) and protobuf (descriptor API).
+# We never use those functions, so we mock them out before importing.
+# ------------------------------------------------------------------
+for mod in ("vt2geojson", "vt2geojson.tools", "vt2geojson.features",
+            "mapbox_vector_tile", "mapbox_vector_tile.encoder",
+            "mapbox_vector_tile.decoder", "mapbox_vector_tile.compat",
+            "mapbox_vector_tile.Mapbox",
+            "mapbox_vector_tile.Mapbox.vector_tile_p3_pb2"):
+    sys.modules[mod] = MagicMock()
+
 import streamlit as st
 import geopandas as gpd
 import pybdshadow
