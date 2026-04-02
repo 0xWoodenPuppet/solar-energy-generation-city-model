@@ -4,7 +4,10 @@ streamlit
 geopandas
 pybdshadow
 pandas
-streamlit-keplergl
-keplergl
 numpy
 plotly
+streamlit-keplergl
+keplergl
+streamlit-folium
+folium
+fpdf2
