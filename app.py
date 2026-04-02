@@ -162,7 +162,7 @@ sel_lon = st.sidebar.number_input(
 # ──────────────────────────────────────────────────────────────
 st.sidebar.header("⚙️ Simulation Settings")
 
-sim_date = st.sidebar.date_input("Analysis Date", value=pd.to_datetime("2022-06-21"))
+sim_date = st.sidebar.date_input("Analysis Date", value=pd.to_datetime("2026-06-21"))
 accuracy = st.sidebar.slider(
     "Grid Resolution (m)", 1, 10, 3,
     help="Smaller = more precise but slower. 3–5 m is recommended."
