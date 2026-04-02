@@ -45,6 +45,7 @@ CAR_CO2_LBS_PER_DAY = 24.6               # avg US passenger car ~24.6 lbs/day
 ELECTRICITY_PRICE_KWH = 0.15
 PV_EFFICIENCY = 0.18
 PERFORMANCE_RATIO = 0.75
+AVG_IRRADIANCE_FACTOR = 0.55                # avg irradiance across daylight hours is ~550 W/m², not peak 1000
 
 # ──────────────────────────────────────────────────────────────
 # CUSTOM CSS  – premium dark‑themed styling
@@ -212,7 +213,7 @@ if run:
 
     # ── Energy Math ──────────────────────────────────────────
     point_area = accuracy ** 2
-    sunshine["kWh_m2"] = sunshine["Hour"] * PV_EFFICIENCY * PERFORMANCE_RATIO
+    sunshine["kWh_m2"] = sunshine["Hour"] * AVG_IRRADIANCE_FACTOR * PV_EFFICIENCY * PERFORMANCE_RATIO
     sunshine["kWh_total"] = sunshine["kWh_m2"] * point_area * usable_area_pct * yield_multiplier
 
     total_kwh = sunshine["kWh_total"].sum()
@@ -244,6 +245,17 @@ if run:
         f"**{profitable_count}** have enough unshaded roof space for a profitable solar installation."
     )
     st.markdown("---")
+
+    # ── METHODOLOGY NOTE ──────────────────────────────────────
+    with st.expander("ℹ️ Assumptions & Methodology"):
+        st.markdown(f"""
+        - **Clear-sky model** — no cloud cover; represents theoretical peak potential.
+        - **Single-day snapshot** ({sim_date}) — annual average is typically 40–60% of summer solstice values.
+        - **LOD-1 flat roofs** — real roof pitch/orientation not modeled.
+        - **Building shadows only** — vegetation and other obstructions not included.
+        - **Avg irradiance factor 0.55** — accounts for lower sun angles in morning/evening hours.
+        - **US grid constants** — CO₂ offset (0.85 lb/kWh) and home consumption (30 kWh/day) use US averages.
+        """)
 
     # ── VISUALIZATIONS ───────────────────────────────────────
     tab_map, tab_heatmap, tab_charts = st.tabs(["🗺️ 3D Map", "🔥 2D Heatmap", "📈 Charts"])
